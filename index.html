@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Software Engineering Practice Assessment</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background:#f4f6f8; color:#1a2433; min-height:100vh; }
+  .wrap { max-width:720px; margin:0 auto; padding:24px 16px 60px; }
+  .card { background:#fff; border-radius:14px; padding:32px 28px; box-shadow:0 2px 10px rgba(20,40,80,.08); margin-top:16px; }
+  h1 { font-size:24px; margin-bottom:6px; }
+  h2 { font-size:19px; margin-bottom:14px; }
+  p { line-height:1.6; font-size:15px; }
+  .muted { color:#5c6b80; font-size:13.5px; }
+  .brand { text-align:center; padding:20px 0 4px; font-weight:700; color:#0a7d33; font-size:15px; letter-spacing:.4px; }
+  input[type=text], input[type=email] { width:100%; padding:12px 14px; border:1.5px solid #cbd5e0; border-radius:8px; font-size:15px; margin:8px 0 4px; }
+  input[type=text]:focus, input[type=email]:focus { outline:none; border-color:#0a7d33; }
+  label.check { display:flex; gap:10px; align-items:flex-start; font-size:14px; margin:14px 0; line-height:1.5; cursor:pointer; }
+  label.check input { margin-top:3px; }
+  .btn { display:inline-block; background:#0a7d33; color:#fff; border:none; padding:13px 30px; font-size:15px; font-weight:600; border-radius:8px; cursor:pointer; margin-top:18px; }
+  .btn:hover { background:#086a2b; }
+  .btn.secondary { background:#eef2f6; color:#1a2433; }
+  .btn:disabled { background:#a8b8c8; cursor:not-allowed; }
+  .btn.full { width:100%; }
+  .topbar { position:sticky; top:0; background:#fff; border-bottom:1px solid #e3e8ee; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; z-index:10; }
+  .timer { font-weight:700; font-size:18px; color:#0a7d33; font-variant-numeric:tabular-nums; }
+  .timer.low { color:#d13c3c; }
+  .progress { flex:1; height:6px; background:#e3e8ee; border-radius:3px; margin:0 16px; overflow:hidden; }
+  .progress > div { height:100%; background:#0a7d33; transition:width .3s; }
+  .qtext { font-size:17px; font-weight:600; line-height:1.55; margin-bottom:20px; white-space:pre-wrap; }
+  .opt { display:block; border:1.5px solid #d7dfe8; border-radius:10px; padding:13px 16px; margin-bottom:10px; cursor:pointer; font-size:15px; line-height:1.5; transition:all .15s; }
+  .opt:hover { border-color:#0a7d33; background:#f2faf5; }
+  .opt.sel { border-color:#0a7d33; background:#e9f7ef; font-weight:600; }
+  .opt.correct { border-color:#0a7d33; background:#e9f7ef; }
+  .opt.wrong { border-color:#d13c3c; background:#fdeaea; }
+  .letter { display:inline-block; width:26px; height:26px; line-height:26px; text-align:center; background:#eef2f6; border-radius:50%; font-size:13px; font-weight:700; margin-right:10px; }
+  .modal-bg { position:fixed; inset:0; background:rgba(15,25,45,.45); display:flex; align-items:center; justify-content:center; padding:20px; z-index:50; }
+  .modal { background:#fff; border-radius:14px; padding:26px; max-width:420px; width:100%; }
+  .steps { margin:18px 0; }
+  .steps div { padding:9px 0 9px 32px; position:relative; font-size:14.5px; line-height:1.5; border-left:2px solid #e3e8ee; margin-left:10px; }
+  .steps div:last-child { border-left:2px solid transparent; }
+  .steps div::before { content:'✓'; position:absolute; left:-12px; top:8px; width:22px; height:22px; line-height:22px; text-align:center; background:#0a7d33; color:#fff; border-radius:50%; font-size:12px; }
+  .rules { background:#f8f9fb; border:1px solid #e3e8ee; border-radius:10px; padding:16px 18px; margin:14px 0; font-size:14px; line-height:1.7; }
+  .score-big { font-size:52px; font-weight:800; color:#0a7d33; }
+  .stat-row { display:flex; gap:12px; flex-wrap:wrap; margin:18px 0; }
+  .stat { flex:1; min-width:120px; background:#f8f9fb; border-radius:10px; padding:14px; text-align:center; }
+  .stat b { display:block; font-size:22px; }
+  .stat span { font-size:12.5px; color:#5c6b80; }
+  table { width:100%; border-collapse:collapse; margin:10px 0 4px; font-size:14px; }
+  th { text-align:left; padding:8px 6px; border-bottom:2px solid #e3e8ee; font-size:12.5px; color:#5c6b80; text-transform:uppercase; letter-spacing:.5px; }
+  td { padding:8px 6px; border-bottom:1px solid #eef2f6; }
+  .rev { border:1px solid #e3e8ee; border-radius:10px; padding:14px 16px; margin:12px 0; font-size:14px; line-height:1.6; }
+  .rev .tag { display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:4px; margin-bottom:8px; letter-spacing:.5px; }
+  .tag.ok { background:#e9f7ef; color:#0a7d33; }
+  .tag.no { background:#fdeaea; color:#d13c3c; }
+  .tag.skip { background:#fdf3e0; color:#a06a00; }
+  .explain { color:#41506a; font-size:13.5px; margin-top:8px; background:#f8f9fb; padding:10px 12px; border-radius:8px; }
+  .modes { display:flex; gap:14px; flex-wrap:wrap; margin-top:16px; }
+  .mode { flex:1; min-width:240px; border:2px solid #e3e8ee; border-radius:12px; padding:20px; cursor:pointer; transition:all .15s; }
+  .mode:hover { border-color:#0a7d33; }
+  .mode h3 { font-size:16px; margin-bottom:6px; }
+  .mode .big { font-size:30px; font-weight:800; color:#0a7d33; margin:6px 0; }
+  a { color:#0a7d33; }
+</style>
+</head>
+<body>
+<div class="brand">SOFTWARE ENGINEERING PRACTICE ASSESSMENT</div>
+<div class="wrap"><div id="app"></div></div>
+
+<script>
+"use strict";
+
+var QUESTIONS = [
+ // ===== JAVASCRIPT =====
+ {cat:"JavaScript", q:"What does typeof null return in JavaScript?", o:['"object"','"null"','"undefined"','"boolean"'], a:0, e:"typeof null returns \"object\" — a historical bug that was never fixed."},
+ {cat:"JavaScript", q:"What does console.log(0.1 + 0.2 === 0.3) print?", o:["true","false","NaN","TypeError"], a:1, e:"Floating point rounding: 0.1 + 0.2 is 0.30000000000000004."},
+ {cat:"JavaScript", q:'What is the result of "5" + 3?', o:['"53"',"8","8.0","NaN"], a:0, e:"The + operator concatenates when either operand is a string. Note \"5\" - 3 gives 2."},
+ {cat:"JavaScript", q:"A loop runs: for (var i = 0; i < 3; i++) setTimeout(function(){ console.log(i); }). What prints?", o:["3 3 3","0 1 2","0 0 0","undefined x3"], a:0, e:"var is one shared binding; by the time the timeouts run, i is 3. With let it would print 0 1 2."},
+ {cat:"JavaScript", q:"What does [10, 9, 1].sort() return?", o:["[1, 10, 9]","[1, 9, 10]","[10, 9, 1]","[9, 10, 1]"], a:0, e:"Default sort is lexicographic (string-based): \"1\", \"10\", \"9\"."},
+ {cat:"JavaScript", q:"What happens when one promise passed to Promise.all rejects?", o:["It rejects immediately with that error","It waits for all others then rejects","It resolves with the fulfilled ones","It throws a sync TypeError"], a:0, e:"Promise.all is fail-fast. Promise.allSettled never rejects."},
+ {cat:"JavaScript", q:"Which array method returns a NEW array?", o:["map","forEach","splice","push"], a:0, e:"map returns a new array. forEach returns undefined, splice mutates in place, push returns the new length."},
+ {cat:"JavaScript", q:"Which statement about splice and slice is correct?", o:["splice mutates the original array, slice does not","slice mutates the original array, splice does not","both mutate","neither mutates"], a:0, e:"splice changes the original; slice returns a copy."},
+ {cat:"JavaScript", q:'What is the difference between value ?? "default" and value || "default"?', o:["?? falls back only on null/undefined","|| falls back only on null/undefined","They are identical","?? throws on falsy values"], a:0, e:"|| also falls back on 0, \"\" and false. ?? only catches null/undefined."},
+ {cat:"JavaScript", q:"What does null == undefined evaluate to?", o:["true","false","TypeError","NaN"], a:0, e:"Loose equality treats them as equal. null === undefined is false."},
+ {cat:"JavaScript", q:"In the event loop, which runs first: a resolved promise callback or setTimeout(fn, 0)?", o:["The promise callback","setTimeout","Both in registration order","Undefined behavior"], a:0, e:"Microtasks (promises) drain before macrotasks (timers)."},
+ {cat:"JavaScript", q:"What is a closure?", o:["A function that keeps access to its outer scope's variables after that scope finished","A function with no return value","A loop that never ends","A private class field"], a:0, e:"Closures retain the environment they were created in."},
+
+ // ===== HTTP & WEB =====
+ {cat:"HTTP", q:"What is the difference between 401 and 403?", o:["401 = not authenticated; 403 = authenticated but not allowed","401 = not allowed; 403 = not authenticated","401 = server error; 403 = client error","They mean the same thing"], a:0, e:"401 = who are you (login needed). 403 = I know you, but you can't do this."},
+ {cat:"HTTP", q:"Which status code should a successful POST that created a resource return?", o:["201","200 only","204","302"], a:0, e:"201 Created. 204 is success with no body."},
+ {cat:"HTTP", q:"Which status code means the client is being rate limited?", o:["429","408","503","409"], a:0, e:"429 Too Many Requests."},
+ {cat:"HTTP", q:"Which set of HTTP methods is idempotent (same effect if repeated)?", o:["GET, PUT, DELETE","POST, PUT, PATCH","GET, POST","POST, DELETE"], a:0, e:"GET, PUT, DELETE and HEAD are idempotent. POST is not."},
+ {cat:"HTTP", q:"What does a 304 response mean?", o:["The cached copy is still valid; no body is sent","The resource moved permanently","The request was malformed","The server is overloaded"], a:0, e:"304 Not Modified — the browser uses its cache."},
+ {cat:"HTTP", q:"Why does a browser send an OPTIONS request before some cross-origin requests?", o:["CORS preflight: checking what the server allows before the real request","To fetch the resource headers only","Because GET is blocked cross-origin","To negotiate encryption"], a:0, e:"The preflight verifies allowed methods/headers for CORS."},
+ {cat:"HTTP", q:"Which cookie flag prevents JavaScript from reading the cookie?", o:["HttpOnly","Secure","SameSite","Path"], a:0, e:"HttpOnly makes the cookie invisible to document.cookie. Secure means HTTPS only."},
+ {cat:"HTTP", q:"What are the three parts of a JWT?", o:["header.payload.signature","id.token.refresh","key.value.expiry","user.role.scope"], a:0, e:"The signature proves the token wasn't tampered with; auth is stateless."},
+
+ // ===== DATABASES & SQL =====
+ {cat:"Databases", q:"Which JOIN keeps all rows from the left table, with NULLs where no match exists on the right?", o:["LEFT JOIN","INNER JOIN","CROSS JOIN","UNION"], a:0, e:"INNER keeps only matches. LEFT keeps every left row."},
+ {cat:"Databases", q:"Which clause filters groups AFTER GROUP BY?", o:["HAVING","WHERE","ORDER BY","LIMIT"], a:0, e:"WHERE filters rows before grouping; HAVING filters the grouped result."},
+ {cat:"Databases", q:"How do you prevent SQL injection?", o:["Parameterized queries","Escaping single quotes manually","Using HTTPS","Storing passwords hashed"], a:0, e:"Prepared statements keep data separate from the query structure."},
+ {cat:"Databases", q:"Which statement about TRUNCATE vs DELETE is correct?", o:["TRUNCATE wipes all rows fast, supports no WHERE, and resets counters","DELETE is faster and resets counters","TRUNCATE supports WHERE","They are identical"], a:0, e:"DELETE removes row by row, supports WHERE, and can be rolled back."},
+ {cat:"Databases", q:"What does the A in ACID stand for?", o:["Atomicity — a transaction fully happens or fully does not","Availability — the DB answers every request","Accuracy — data is always correct","Async — operations never block"], a:0, e:"Atomicity, Consistency, Isolation, Durability."},
+ {cat:"Databases", q:"Can a primary key column contain NULL?", o:["No, never","Yes, one row only","Yes, any number of rows","Only in MySQL"], a:0, e:"Primary keys must be unique AND NOT NULL. Unique constraints may allow NULLs."},
+ {cat:"Databases", q:"What does an index do?", o:["Speeds up reads at the cost of slower writes and more storage","Speeds up both reads and writes","Reduces file size","Enforces foreign keys"], a:0, e:"Every insert/update must also update the index."},
+ {cat:"Databases", q:"What is the N+1 query problem?", o:["1 query for a list plus 1 extra query per item fetched","A query with N joins","N transactions in one connection","A query that returns N+1 rows"], a:0, e:"Fix with a join or batch loading."},
+
+ // ===== HTML & CSS =====
+ {cat:"HTML/CSS", q:"What is the purpose of the <!DOCTYPE html> declaration?", o:["Tells the browser to use standards mode instead of quirks mode","Links the CSS file","Declares the language of the page","Loads JavaScript"], a:0, e:"Without it, browsers fall back to legacy quirks mode rendering."},
+ {cat:"HTML/CSS", q:"What is the difference between defer and async on a script tag?", o:["defer downloads in parallel but executes in order after parsing; async executes as soon as downloaded, out of order","async waits for parsing; defer runs immediately","Both block HTML parsing","There is no difference"], a:0, e:"Use defer for scripts that depend on order or the DOM."},
+ {cat:"HTML/CSS", q:"What does box-sizing: border-box change?", o:["width includes padding and border, not just content","margin is added inside the box","borders are drawn inside padding","content shrinks to fit the border"], a:0, e:"With border-box, the declared width is the full visible box width."},
+ {cat:"HTML/CSS", q:"Can two elements on the same page share an id?", o:["No, ids must be unique; classes can repeat","Yes, ids can repeat","Only in HTML5","Only inside forms"], a:0, e:"Duplicate ids break getElementById and label targeting."},
+ {cat:"HTML/CSS", q:"Which storage clears when the browser tab closes?", o:["sessionStorage","localStorage","Cookies","IndexedDB"], a:0, e:"localStorage persists until cleared; cookies persist until expiry."},
+
+ // ===== TYPESCRIPT =====
+ {cat:"TypeScript", q:"What is the difference between any and unknown?", o:["unknown still requires you to narrow the type before use; any disables checking","unknown disables checking; any is stricter","unknown only works with objects","They are aliases"], a:0, e:"unknown is the type-safe version of any."},
+ {cat:"TypeScript", q:"What happens if you declare the same interface name twice?", o:["The declarations merge into one","A compile error","The second silently overwrites the first","It becomes a type alias"], a:0, e:"Interfaces merge on re-declaration; re-declaring a type alias is an error."},
+ {cat:"TypeScript", q:"Are TypeScript types checked at runtime?", o:["No — types are erased at compile time; what runs is plain JavaScript","Yes, the runtime validates every type","Only unknown types","Only in strict mode"], a:0, e:"TS is compile-time only (plus a little syntax that survives)."},
+ {cat:"TypeScript", q:"What does readonly do to a property?", o:["Makes it unassignable after the object is created","Makes it a constant file-wide","Prevents reading it outside the class","Encrypts it"], a:0, e:"readonly blocks reassignment; object contents may still change if nested."},
+
+ // ===== NODE.JS =====
+ {cat:"Node.js", q:"How does Node.js handle concurrent requests on one thread?", o:["An event loop with non-blocking I/O keeps the thread serving while awaiting slow operations","It spawns one OS thread per request","It queues requests until one finishes","It uses multiple processes per request"], a:0, e:"Heavy file/crypto work is offloaded to a small libuv thread pool."},
+ {cat:"Node.js", q:"What happens if Express middleware never calls next()?", o:["The request hangs; later middleware never runs","Express throws an error","The route is skipped","Nothing, it is optional"], a:0, e:"Middleware must either end the response or call next()."},
+ {cat:"Node.js", q:"What does package-lock.json guarantee?", o:["Identical dependency versions on every install","The app has no vulnerabilities","Faster installs","npm will never update"], a:0, e:"It locks the exact resolved tree; commit it."},
+ {cat:"Node.js", q:"In semver, what versions does ^4.17.1 allow?", o:["4.x.x (minor and patch updates, not 5.0.0)","4.17.x only","any version","exact 4.17.1 only"], a:0, e:"^ allows minor+patch within the same major. ~ allows patch only."},
+
+ // ===== REACT =====
+ {cat:"React", q:"Why do lists need keys in React?", o:["So React can match items between renders and patch only what changed","To sort the list","To make items draggable","Keys are optional decoration"], a:0, e:"Unstable keys (like array indexes on reordering) cause bugs."},
+ {cat:"React", q:"What does useEffect(() => {...}, []) do?", o:["Runs once after the component mounts","Runs on every render","Runs never","Runs before mount"], a:0, e:"Empty dependency array = mount only. Return a cleanup function to undo it."},
+ {cat:"React", q:"Why must state updates be immutable (new array/object, not mutation)?", o:["React detects change by reference; mutating in place looks unchanged and skips re-render","Immutable code runs faster","Mutation causes memory leaks","It is only a style preference"], a:0, e:"setItems([...items, x]) not items.push(x)."},
+ {cat:"React", q:"What is the difference between props and state?", o:["Props are passed in by the parent and read-only; state is internal and changeable","Props are internal; state comes from the parent","Props are mutable; state is not","No difference"], a:0, e:"To share data between siblings, lift state up to the closest common parent."},
+ {cat:"React", q:"What is a controlled input?", o:["An input whose value comes from state","An input with a ref","An input that cannot be typed into","An input with type=controlled"], a:0, e:"Uncontrolled inputs keep their own value, read via refs."},
+
+ // ===== GIT =====
+ {cat:"Git", q:"git pull is a shortcut for:", o:["git fetch + git merge","git fetch + git rebase","git clone + git merge","git remote + git push"], a:0, e:"Pull grabs remote changes and merges them into your branch."},
+ {cat:"Git", q:"What does git reset --soft do?", o:["Moves HEAD but keeps your changes staged","Deletes your changes entirely","Undoes the last commit permanently","Creates a revert commit"], a:0, e:"--soft keeps changes staged; --hard throws them away."},
+ {cat:"Git", q:"Merge vs rebase?", o:["Merge preserves branch history with a merge commit; rebase replays commits on top for a linear history","Rebase creates merge commits","Merge deletes history","They are identical"], a:0, e:"Rebase rewrites commit history — avoid on shared branches."},
+
+ // ===== SECURITY =====
+ {cat:"Security", q:"Hashing vs encryption?", o:["Hashing is one-way; encryption is reversible with a key","Hashing is reversible; encryption is not","Both are reversible","Neither is reversible"], a:0, e:"Passwords: hash with bcrypt/Argon2 + salt. Never encrypt/store reversibly."},
+ {cat:"Security", q:"What is a salt used for?", o:["Random data added before hashing so identical passwords hash differently","Encrypting the database","Signing JWTs","Slowing the network"], a:0, e:"Salts defeat rainbow tables."},
+ {cat:"Security", q:"XSS vs CSRF?", o:["XSS: attacker script runs in your users' browsers. CSRF: another site fires authenticated requests as your logged-in user","They are the same attack","XSS happens on servers, CSRF in browsers","CSRF is a server crash, XSS is a redirect"], a:0, e:"XSS fix: escape output + CSP. CSRF fix: SameSite cookies + tokens."},
+ {cat:"Security", q:"Where should API keys and secrets live?", o:["Environment variables / a secrets manager, never in code or git","In a constants.ts file","In the frontend bundle","In the README"], a:0, e:"Anything shipped to the browser is public."},
+
+ // ===== ATTENTION TO DETAIL =====
+ {cat:"Attention", q:"Find the odd value: 4830, 4830, 4380, 4830", o:["4380","4830 (second)","4830 (first)","4830 (fourth)"], a:0, e:"4380 has the 8 and 3 swapped."},
+ {cat:"Attention", q:"Which string differs from the others?", o:["INV-2026-0417","INV-2026-0417","INV-2026-041 7","INV-2026-0417"], a:2, e:"The third has an extra space: 041 7."},
+ {cat:"Attention", q:"Which is the odd one out?", o:["paymentReceived","paymentReceived","paymentRecieved","paymentReceived"], a:2, e:"\"Recieved\" — i before e typo."},
+ {cat:"Attention", q:"What is the next number: 2, 6, 12, 20, 30, ...?", o:["42","40","38","36"], a:0, e:"Gaps grow +4, +6, +8, +10, +12."},
+ {cat:"Attention", q:"What is the next number: 1, 1, 2, 3, 5, 8, ...?", o:["13","11","12","10"], a:0, e:"Fibonacci: each number is the sum of the two before it."},
+ {cat:"Attention", q:"What is the next number: 100, 92, 85, 79, 74, ...?", o:["70","69","71","68"], a:0, e:"Gaps shrink: -8, -7, -6, -5, then -4."},
+ {cat:"Attention", q:"Which email address is malformed?", o:["ada@gmail.com","bola@yahoo.co","chuk@@gmail.com","dayo@outlook.com"], a:2, e:"Double @ in chuk@@gmail.com."},
+ {cat:"Attention", q:"How many characters differ between: user_id=881 and user_ld=881?", o:["1","2","3","0"], a:0, e:"Only the r/l in the middle of \"user\"."},
+ {cat:"Attention", q:"Compare carefully. SELECT * FROM orders WHERE id = 4521 vs SELECT * FROM orders WHERE id = 452l. What is different?", o:["The second ends with a lowercase L instead of 1","Nothing","The second is missing a space","The second uses FROM twice"], a:0, e:"452l (letter) vs 4521 (digit) — a classic silent bug."},
+
+ // ===== CRITICAL THINKING =====
+ {cat:"Critical Thinking", q:"If 5 machines make 5 widgets in 5 minutes, how long do 100 machines take to make 100 widgets?", o:["5 minutes","20 minutes","100 minutes","1 minute"], a:0, e:"Each machine makes 1 widget in 5 minutes. Rate per machine is unchanged."},
+ {cat:"Critical Thinking", q:"A bat and a ball cost 1.10 in total. The bat costs 1.00 more than the ball. How much is the ball?", o:["0.05","0.10","1.00","0.01"], a:0, e:"Ball 0.05 + bat 1.05 = 1.10. The intuitive 0.10 answer fails the check."},
+ {cat:"Critical Thinking", q:"Lily pads double every day and cover the whole lake in 48 days. When was the lake half covered?", o:["Day 47","Day 24","Day 46","Day 32"], a:0, e:"Working backwards: one day before full coverage it was half."},
+ {cat:"Critical Thinking", q:"You deploy at 2:00 PM. Error rate spikes at 2:05. The database was also restarted at 2:04. What do you try first?", o:["Roll back the deploy — it is reversible in one step, then test the DB theory","Restart the database again","Rewrite the failing module","Wait and see if it settles"], a:0, e:"Restore service first with the cheapest reversible action, then isolate the cause."},
+ {cat:"Critical Thinking", q:"Users say the app is slow, but server dashboards show fast responses. Where do you look first?", o:["The client side: user network latency and frontend rendering","Buy bigger servers","Rewrite the backend","Restart the database"], a:0, e:"Server fast + user slow = the time is going elsewhere (network, rendering)."}
+];
+
+var PRACTICE = [
+ {q:"Which HTTP method is used to retrieve a resource without changing it?", o:["GET","POST","DELETE","PATCH"], a:0},
+ {q:"Which data structure is FIFO (first in, first out)?", o:["Queue","Stack","Binary tree","Hash map"], a:0}
+];
+
+var state = { screen:"landing", mode:null, qs:[], idx:0, answers:[], sel:null, timer:null, remaining:0, started:0, pIdx:0, pSel:null };
+
+function el(id){ return document.getElementById(id); }
+function app(html){ el("app").innerHTML = html; window.scrollTo(0,0); }
+function shuffle(arr){ var a=arr.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function fmt(s){ var m=Math.floor(s/60), x=s%60; return (m<10?"0":"")+m+":"+(x<10?"0":"")+x; }
+function best(){ try { return localStorage.getItem("se_pa_best")||null; } catch(e){ return null; } }
+function setBest(v){ try { localStorage.setItem("se_pa_best", String(v)); } catch(e){} }
+
+// ---------- LANDING ----------
+function renderLanding(){
+  var b = best();
+  app('<div class="card">'
+   +'<h1>Software Engineering Fundamentals</h1>'
+   +'<p class="muted">A timed practice assessment built to mirror the TestGorilla experience: welcome screen, practice questions, a countdown timer, skip warnings, and instant scoring.</p>'
+   +(b ? '<p class="muted" style="margin-top:10px">Your best score so far: <b>'+b+'%</b></p>' : '')
+   +'<h2 style="margin-top:24px">Choose your mode</h2>'
+   +'<div class="modes">'
+   +'<div class="mode" onclick="startSetup(\'full\')"><h3>Full Simulation</h3><div class="big">40 Q</div><p class="muted">40 questions in 30 minutes. Closest to the real thing.</p></div>'
+   +'<div class="mode" onclick="startSetup(\'quick\')"><h3>Quick Drill</h3><div class="big">15 Q</div><p class="muted">15 questions in 10 minutes. Warm-up or retest weak areas.</p></div>'
+   +'</div></div>');
+}
+
+// ---------- WELCOME / SETUP ----------
+function startSetup(mode){
+  state.mode = mode;
+  var n = mode==="full" ? 40 : 15;
+  var mins = mode==="full" ? 30 : 10;
+  app('<div class="card">'
+   +'<h2>Welcome to your assessment</h2>'
+   +'<p>This practice assessment contains <b>'+n+' multiple-choice questions</b> and should take around <b>'+mins+' minutes</b>.</p>'
+   +'<div class="rules">'
+   +'1. The assessment is <b>timed</b>. A countdown is shown at the top at all times.<br>'
+   +'2. One question at a time. You <b>cannot go back</b> once you move on.<br>'
+   +'3. Skipping a question counts as a <b>wrong answer</b> — you will get a warning first. If you do not know, guess.<br>'
+   +'4. Pen, paper, and a calculator are allowed. <b>Avoid AI tools</b> — this practice only helps you if you answer honestly.<br>'
+   +'5. In the real test you must stay in full-screen mode and snapshots are taken periodically. Stay focused here too.'
+   +'</div>'
+   +'<label class="check"><input type="checkbox" id="honest"><span>I commit to completing this assessment honestly, without AI tools or outside help.</span></label>'
+   +'<button class="btn full" id="goBtn" disabled onclick="startPractice()">Agree and continue</button>'
+   +'</div>');
+  el("honest").onchange = function(){ el("goBtn").disabled = !this.checked; };
+}
+
+// ---------- PRACTICE QUESTIONS ----------
+function startPractice(){
+  state.pIdx = 0; state.pSel = null;
+  renderPractice();
+}
+function renderPractice(){
+  var p = PRACTICE[state.pIdx];
+  app('<div class="topbar"><span class="muted">Practice question</span><span class="timer">Not scored</span></div>'
+   +'<div class="card"><p class="muted" style="margin-bottom:14px">Practice questions do not count toward your score. They show you how the platform works.</p>'
+   +'<div class="qtext">'+p.q+'</div>'
+   +'<div id="opts">'+p.o.map(function(o,i){ return '<div class="opt" data-i="'+i+'" onclick="pPick('+i+')"><span class="letter">'+String.fromCharCode(65+i)+'</span>'+o+'</div>'; }).join("")+'</div>'
+   +'<button class="btn full" id="pNext" disabled onclick="pNext()">Check answer</button></div>');
+}
+function pPick(i){
+  state.pSel = i;
+  var p = PRACTICE[state.pIdx];
+  var opts = document.querySelectorAll(".opt");
+  opts.forEach(function(o,j){ o.className = j===p.a ? "opt correct" : (j===i ? "opt wrong" : "opt"); });
+  el("pNext").disabled = false;
+  el("pNext").textContent = state.pIdx < PRACTICE.length-1 ? "Next practice question" : "Start the real test";
+}
+function pNext(){
+  state.pIdx++;
+  state.pSel = null;
+  if(state.pIdx < PRACTICE.length) renderPractice();
+  else startTest();
+}
+
+// ---------- TEST ----------
+function startTest(){
+  var n = state.mode==="full" ? 40 : 15;
+  state.qs = shuffle(QUESTIONS).slice(0, n);
+  state.idx = 0; state.answers = []; state.sel = null;
+  state.remaining = state.mode==="full" ? 30*60 : 10*60;
+  state.started = Date.now();
+  renderQuestion();
+  state.timer = setInterval(tick, 1000);
+}
+function tick(){
+  state.remaining--;
+  var t = document.querySelector(".timer");
+  if(t){ t.textContent = fmt(Math.max(0,state.remaining)); if(state.remaining<=300) t.className="timer low"; }
+  if(state.remaining<=0){ clearInterval(state.timer); finish(true); }
+}
+function renderQuestion(){
+  var q = state.qs[state.idx];
+  var topbar = '<div class="topbar"><span class="muted">Question '+(state.idx+1)+' of '+state.qs.length+'</span>'
+   +'<div class="progress"><div style="width:'+Math.round(state.idx/state.qs.length*100)+'%"></div></div>'
+   +'<span class="timer">'+fmt(state.remaining)+'</span></div>';
+  app(topbar + '<div class="card">'
+   +'<p class="muted" style="margin-bottom:10px">'+q.cat+'</p>'
+   +'<div class="qtext">'+q.q+'</div>'
+   +'<div id="opts">'+q.o.map(function(o,i){ return '<div class="opt" data-i="'+i+'" onclick="pick('+i+')"><span class="letter">'+String.fromCharCode(65+i)+'</span>'+o+'</div>'; }).join("")+'</div>'
+   +'<button class="btn full" id="nextBtn" onclick="next()">Next</button>'
+   +'<p class="muted" style="margin-top:12px">No answer selected? Next will count as a skip (wrong) — you cannot come back.</p>'
+   +'</div>');
+}
+function pick(i){
+  state.sel = i;
+  document.querySelectorAll(".opt").forEach(function(o,j){ o.className = j===i ? "opt sel" : "opt"; });
+}
+function next(){
+  if(state.sel===null){ showSkipModal(); return; }
+  state.answers.push({ q:state.qs[state.idx], picked:state.sel });
+  advance();
+}
+function showSkipModal(){
+  appModal('<div class="modal"><h2>Skip this question?</h2>'
+   +'<p>Skipped questions <b>count as wrong answers</b> and you <b>cannot go back</b> to them later. We recommend guessing instead.</p>'
+   +'<button class="btn secondary full" style="margin-top:16px" onclick="closeModal()">Go back and answer</button>'
+   +'<button class="btn full" style="margin-top:10px" onclick="skipConfirm()">Skip question</button></div>');
+}
+function skipConfirm(){
+  closeModal();
+  state.answers.push({ q:state.qs[state.idx], picked:null });
+  advance();
+}
+function appModal(inner){
+  var d = document.createElement("div"); d.className="modal-bg"; d.id="mbg";
+  d.innerHTML = inner; document.body.appendChild(d);
+}
+function closeModal(){ var m = el("mbg"); if(m) m.remove(); }
+function advance(){
+  state.idx++; state.sel = null;
+  if(state.idx >= state.qs.length){ clearInterval(state.timer); finish(false); }
+  else renderQuestion();
+}
+
+// ---------- RESULTS ----------
+function finish(timeUp){
+  var correct=0, skipped=0;
+  var byCat = {};
+  state.answers.forEach(function(a){
+    var cat = a.q.cat;
+    if(!byCat[cat]) byCat[cat] = {t:0, c:0};
+    byCat[cat].t++;
+    if(a.picked===null){ skipped++; }
+    else if(a.picked===a.q.a){ correct++; byCat[cat].c++; }
+  });
+  var pct = Math.round(correct/state.qs.length*100);
+  if(best()===null || pct > parseInt(best())) setBest(pct);
+  var used = Math.round((Date.now()-state.started)/1000);
+  var limit = state.mode==="full" ? 1800 : 600;
+  var verdict = pct>=80 ? "Pass territory. Keep this level tomorrow." : (pct>=60 ? "Solid base — drill the red categories again tonight." : "Redo the weak categories in the Mega Drill Pack, then retake.");
+
+  var catRows = Object.keys(byCat).map(function(c){
+    var s = byCat[c]; var p = Math.round(s.c/s.t*100);
+    var bar = p>=80 ? "#0a7d33" : (p>=50 ? "#a06a00" : "#d13c3c");
+    return "<tr><td>"+c+"</td><td>"+s.c+" / "+s.t+"</td><td style='color:"+bar+";font-weight:700'>"+p+"%</td></tr>";
+  }).join("");
+
+  var review = state.answers.map(function(a,i){
+    var q=a.q, ok = a.picked===q.a, skip = a.picked===null;
+    var tag = skip ? '<span class="tag skip">SKIPPED</span>' : (ok ? '<span class="tag ok">CORRECT</span>' : '<span class="tag no">WRONG</span>');
+    var yours = skip ? "No answer (skipped)" : q.o[a.picked];
+    return '<div class="rev">'+tag
+     +'<div style="font-weight:600">'+(i+1)+'. '+q.q+'</div>'
+     +'<div style="margin-top:6px">Your answer: '+yours+'</div>'
+     +(ok?"":'<div style="margin-top:4px;color:#0a7d33">Correct answer: '+q.o[q.a]+'</div>')
+     +'<div class="explain">'+q.e+'</div></div>';
+  }).join("");
+
+  app('<div class="card">'
+   +'<h2>'+(timeUp ? "Time is up!" : "Assessment complete")+'</h2>'
+   +'<div class="score-big">'+pct+'%</div>'
+   +'<p class="muted">'+correct+' correct of '+state.qs.length+' questions · skipped questions count as wrong</p>'
+   +'<div class="stat-row">'
+   +'<div class="stat"><b>'+correct+'</b><span>Correct</span></div>'
+   +'<div class="stat"><b>'+(state.qs.length-correct-skipped)+'</b><span>Wrong</span></div>'
+   +'<div class="stat"><b>'+skipped+'</b><span>Skipped</span></div>'
+   +'<div class="stat"><b>'+fmt(used)+'</b><span>Time used</span></div>'
+   +'</div>'
+   +'<p style="margin:6px 0 14px">'+verdict+'</p>'
+   +'<h2>Score by category</h2>'
+   +'<table><tr><th>Category</th><th>Correct</th><th>Score</th></tr>'+catRows+'</table>'
+   +'<button class="btn" onclick="renderLanding()">Retake</button>'
+   +'</div>'
+   +'<div class="card"><h2>Review every question</h2>'+review+'</div>');
+}
+
+renderLanding();
+</script>
+</body>
+</html>
